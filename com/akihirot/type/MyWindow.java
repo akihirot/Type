@@ -15,7 +15,7 @@ public class MyWindow extends JFrame implements ActionListener{
 	final int RIGHT = 1;
 
 	Container contentPane;
-	LessonPanel ShortLessonPanel;
+	MiddleLessonPanel MiddleLessonPanel;
 	SellectPanel SellectPane;
 	ResultPanel ResultPane;
 	MyKeyAdapter KeyAd;
@@ -60,19 +60,22 @@ public class MyWindow extends JFrame implements ActionListener{
 	}
 
 	/********** Panel Creater **********/
-	public void CreateShortLessonPanel(int LessonNum){
+	public void CreateMiddleLessonPanel(){
 		SellectPane.setVisible(false);
 
-		ShortLessonPanel = new LessonPanel();
+		MiddleLessonPanel = new MiddleLessonPanel();
 		PS = PaneState.ShortLesson;
-		ShortLessonPanel.showKey();
-		contentPane.add(ShortLessonPanel, BorderLayout.CENTER);
+		MiddleLessonPanel.showKey();
+		contentPane.add(MiddleLessonPanel, BorderLayout.CENTER);
 		LessonTimer = new Timer(10, this);
 		LessonTimer.setActionCommand("LessonTimer");
-		ShortLessonPanel.setLesson(LessonNum);
+		MiddleLessonPanel.setLesson();
 	}
 
-	public void CreateLessonPanel(){
+	public void CreateLessonPanel(int LessonNum){
+		switch(LessonNum){
+		case 1:CreateMiddleLessonPanel();
+		}
 	}
 
 	public void CreateSellectPanel(){
@@ -99,7 +102,7 @@ public class MyWindow extends JFrame implements ActionListener{
 		ResultPane.Button_OK.addActionListener(this);
 		ResultPane.Button_OK.setActionCommand("Button_OK");
 		contentPane.add(ResultPane, BorderLayout.CENTER);
-		contentPane.remove(ShortLessonPanel);
+		contentPane.remove(MiddleLessonPanel);
 	}
 	/********** Panel Creater END **********/
 
@@ -114,12 +117,12 @@ public class MyWindow extends JFrame implements ActionListener{
 				slideRightTimer.start();
 			}
 			
-			//ここにレベルのパネルの移動の記述を入れる
-			//enumでどのレベルかの状態を示すようにする
-			//移動は位置の設定
-			//位置を取得できる？
-			//ｘだけ移動できる？
-			//いまは飛ぶからtimeで徐々に動くように
+				//ここにレベルのパネルの移動の記述を入れる
+				//enumでどのレベルかの状態を示すようにする
+				//移動は位置の設定
+				//位置を取得できる？
+				//ｘだけ移動できる？
+				//いまは飛ぶからtimeで徐々に動くように
 		}
 	}
 	
@@ -166,19 +169,19 @@ public class MyWindow extends JFrame implements ActionListener{
 					break;
 				int Iin = Integer.parseInt("" + in);
 				SellectPane.setVisible(false);
-				CreateShortLessonPanel(Iin);
+				CreateLessonPanel(Iin);
 				contentPane.remove(SellectPane);
 				break;
 			case ShortLesson:
-				if(ShortLessonPanel.LessonNotEnd){
+				if(MiddleLessonPanel.LessonNotEnd){
 					break;
 				}
 				if(LessonTimer.isRunning() == false){
 					LessonTimer.start();
 				}
 
-				ShortLessonPanel.TypedKey(in);
-				if(ShortLessonPanel.LessonNotEnd){
+				MiddleLessonPanel.TypedKey(in);
+				if(MiddleLessonPanel.LessonNotEnd){
 					LessonTimer.stop();
 					repaintTimer.start();
 				}
@@ -201,18 +204,18 @@ public class MyWindow extends JFrame implements ActionListener{
 			break;
 		case ShortLesson:
 			if(e.getActionCommand() == "repaintTimer"){
-				if(ShortLessonPanel.LessonNotEnd){
-					ShortLessonPanel.LessonNotEnd = false;
-					CreateResultPanel(ShortLessonPanel.typingNum,
-							ShortLessonPanel.missTipe,ShortLessonPanel.fixTipe, ShortLessonPanel.msec);
-					ShortLessonPanel.setEnabled(false);
+				if(MiddleLessonPanel.LessonNotEnd){
+					MiddleLessonPanel.LessonNotEnd = false;
+					CreateResultPanel(MiddleLessonPanel.typingNum,
+							MiddleLessonPanel.missTipe,MiddleLessonPanel.fixTipe, MiddleLessonPanel.msec);
+					MiddleLessonPanel.setEnabled(false);
 					repaintTimer.stop();
 					setVisible(true);
 				}
 				break ;
 			}
 			if(e.getActionCommand()=="LessonTimer"){
-				ShortLessonPanel.callLessonTimer();
+				MiddleLessonPanel.callLessonTimer();
 				repaint();
 				break;
 			}
@@ -338,7 +341,7 @@ public class MyWindow extends JFrame implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			CreateShortLessonPanel(1);
+			CreateLessonPanel(1);
 			contentPane.remove(SellectPane);
 			requestFocus();
 		}

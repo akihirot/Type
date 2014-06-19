@@ -24,32 +24,32 @@ public class ResultPanel extends JPanel {
 	JLabel MissLabel;
 	JLabel FixLabel;
 	
-	ResultPanel(int typingNum,int missTipe,int fixTipe, int msec){
+		ResultPanel(int typingNum,int missTipe,int fixTipe, int msec){
 		super();
 		setLayout(null);
-		
-//		setBackground(Back);
-		
+
+		// setBackground(Back);
+
 		JLabel SpeedLabel = new JLabel();
 		SpeedLabel.setBounds(100, 250, 250, 50);
-//		SpeedLabel.setBackground(Color.WHITE);
+		// SpeedLabel.setBackground(Color.WHITE);
 		SpeedLabel.setFont(new Font("MS 明朝", Font.BOLD,20));
 		SpeedLabel.setForeground(Color.WHITE);
 		JLabel MissLabel = new JLabel();
 		MissLabel.setBounds(100, 300, 200, 50);
-//		MissLabel.setBackground(Color.white);
+		// MissLabel.setBackground(Color.white);
 		MissLabel.setFont(new Font("MS 明朝", Font.BOLD,20));
 		MissLabel.setForeground(Color.WHITE);
 		JLabel FixLabel = new JLabel();
 		FixLabel.setBounds(100, 350, 200, 50);
-//		FixLabel.setBackground(Niagara);
+		// FixLabel.setBackground(Niagara);
 		FixLabel.setFont(new Font("MS 明朝", Font.BOLD,20));
 		FixLabel.setForeground(Color.WHITE);
-		
+
 		SpeedLabel.setText("打鍵速度："+ (typingNum*60000/msec) + "文字/分");
 		MissLabel.setText("ミス：" + missTipe);
 		FixLabel.setText("訂正回数：" + fixTipe);
-		
+
 		Button_OK = new JButton("OK (Enter)");
 		Button_OK.setBounds(550,250,100,50);
 		Button_OK.setBackground(Niagara);

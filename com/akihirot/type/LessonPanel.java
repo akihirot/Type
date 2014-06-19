@@ -11,6 +11,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.akihirot.io.FileInput;
+
 public class LessonPanel extends JPanel{
 
 	private static final long serialVersionUID = 1L;
@@ -20,7 +22,7 @@ public class LessonPanel extends JPanel{
 	final int ENABLE = 1;
 
 	// String for Tipe
-	final String[] stLesson ={ "well done is better than well said" ,"wouldn't it be nice","dd."};
+	String[] stLesson;
 	final String pointer = "<font color=navy>_</font>";
 	final char space = 0x25AF;
 	final String stSpace = "<font color=red>"+space+"</font>" ;
@@ -28,6 +30,8 @@ public class LessonPanel extends JPanel{
 	final String[] wordOfKey = {"1234567890-^","QWERTYUIOP@[","ASDFGHJKL;:]","ZXCVBNM,./"};
 
 	final Color Aquamarine = new Color(0xE0,0xF8,0xD8,255);
+	
+	final FileInput FI = new FileInput();
 
 	JLabel ansLabel;
 	JLabel typeLabel;
@@ -47,18 +51,6 @@ public class LessonPanel extends JPanel{
 	LessonPanel(){
 		super();
 		setLayout(null);
-
-	//setLabels
-		ansLabel = new JLabel();
-		ansLabel.setBounds(100,80,600,100);
-		typeLabel = new JLabel();
-		typeLabel.setBounds(100,115,600,100);
-		timeLabel = new JLabel();
-		timeLabel.setBounds(600,50,100,50);
-
-		ansLabel.setFont(new Font("Courier New", Font.BOLD,25));
-		typeLabel.setFont(new Font("Courier New", Font.BOLD,25));
-		timeLabel.setFont(new Font("Arial", Font.BOLD,25));
 
 		/*
 		 * Must test change Font to "Segoe UI Symbol"
@@ -84,17 +76,6 @@ public class LessonPanel extends JPanel{
 		add(timeLabel);
 
 	}
-
-	public void paintComponent(Graphics g){
-		  Graphics2D g2 = (Graphics2D)g;
-
-		  g2.setPaint(Aquamarine);
-		  g2.fill(new Rectangle2D.Double(0.0d, 0.0d, 800.0d, 600.0d));
-		  g2.setPaint(Color.WHITE);
-		  g2.fill(new Rectangle2D.Double(80.0d, 100.0d, 640.0d, 90.0d));
-
-
-		}
 
 
 		public int TypedKey(char in) {
@@ -138,7 +119,7 @@ public class LessonPanel extends JPanel{
 			} // BackSpace key  end
 			else if(in == KeyEvent.VK_SPACE)			// Space key
 			{
-				typeLabel.setText(s +"<font color=red>"+stSpace+"</font>" + pointer);
+				typeLabel.setText(s +"<font color=red>"+space+"</font>" + pointer);
 				typingNum++;
 				missTipe++;
 			}	// Space key  end
