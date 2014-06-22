@@ -10,12 +10,12 @@ import java.awt.event.KeyEvent;
 public class MyWindow extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 
-	final Color Aquamarine = new Color(0xE0,0xF8,0xD8,255);
 	final int LEFT = -1;
 	final int RIGHT = 1;
 
 	Container contentPane;
-	MiddleLessonPanel MiddleLessonPanel;
+	BeginnerLessonPanel BLP;
+	MiddleLessonPanel MLP;
 	SellectPanel SellectPane;
 	ResultPanel ResultPane;
 	MyKeyAdapter KeyAd;
@@ -28,18 +28,19 @@ public class MyWindow extends JFrame implements ActionListener{
 
 	enum  PaneState{
 		Lesson,
-		ShortLesson,
+		BeginnerLesson,
+		MiddleLesson,
 		Sellect,
 		Start,
 		Result
 	}
 	enum SellectState{
-		Biginner,
+		Beginner,
 		Middle,
 		Senior
 	}
 	PaneState PS = PaneState.Sellect;
-	SellectState SS = SellectState.Biginner;
+	SellectState SS = SellectState.Beginner;
 
 	MyWindow() {
 		super("Typinnnnnnnnnnnnnnnnnnnnnnnnnnnn");
@@ -63,25 +64,40 @@ public class MyWindow extends JFrame implements ActionListener{
 	public void CreateMiddleLessonPanel(){
 		SellectPane.setVisible(false);
 
-		MiddleLessonPanel = new MiddleLessonPanel();
-		PS = PaneState.ShortLesson;
-		MiddleLessonPanel.showKey();
-		contentPane.add(MiddleLessonPanel, BorderLayout.CENTER);
-		LessonTimer = new Timer(10, this);
+		MLP = new MiddleLessonPanel();
+		PS = PaneState.MiddleLesson;
+		MLP.showKey();
+		contentPane.add(MLP, BorderLayout.CENTER);
+		LessonTimer = new Timer(100, this);
 		LessonTimer.setActionCommand("LessonTimer");
-		MiddleLessonPanel.setLesson();
+		MLP.setLesson();
+	}
+
+	public void CreateBeginnerLessonPanel(){
+		SellectPane.setVisible(false);
+		BLP = new BeginnerLessonPanel();
+		PS = PaneState.BeginnerLesson;
+		BLP.showKey();
+		contentPane.add(BLP, BorderLayout.CENTER);
+		LessonTimer = new Timer(100, this);
+		LessonTimer.setActionCommand("LessonTimer");
+		BLP.setLesson();
 	}
 
 	public void CreateLessonPanel(int LessonNum){
 		switch(LessonNum){
-		case 1:CreateMiddleLessonPanel();
+			case 0: CreateBeginnerLessonPanel();
+			        break;
+			case 1: CreateMiddleLessonPanel();
+			        break;
+			default: break; 
 		}
 	}
 
 	public void CreateSellectPanel(){
 		SellectPane = new SellectPanel();
 		PS = PaneState.Sellect;
-		SS = SellectState.Biginner;
+		SS = SellectState.Beginner;
 		setDots(LevelNum, SS);
 		contentPane.add(SellectPane, BorderLayout.CENTER);
 /*		for(int i = 0; i<SellectPane.LessonButton.length;i++){
@@ -96,19 +112,25 @@ public class MyWindow extends JFrame implements ActionListener{
 //		SellectPane.SellectButton[0].setVisible(false);
 	}
 
-	public void CreateResultPanel(int typingNum,int missTipe,int fixTipe, int msec){
-		ResultPane = new ResultPanel(typingNum,missTipe, fixTipe, msec);
-		PS = PaneState.Result;
+	public void CreateResultPanel(int typingNum,int missType,int fixType, int msec){
+		ResultPane = new ResultPanel(typingNum,missType, fixType, msec);
 		ResultPane.Button_OK.addActionListener(this);
 		ResultPane.Button_OK.setActionCommand("Button_OK");
 		contentPane.add(ResultPane, BorderLayout.CENTER);
-		contentPane.remove(MiddleLessonPanel);
+		switch(PS) {
+			case BeginnerLesson: contentPane.remove(BLP);
+				      break;
+			case MiddleLesson: contentPane.remove(MLP);
+				    break;
+			default: break;
+		}
+		PS = PaneState.Result;
 	}
 	/********** Panel Creater END **********/
 
 	public void goSellectClick(int e){
 /*		if(e<10){
-			CreateShortLessonPanel(e);
+			CreateMiddleLessonPanel(e);
 			contentPane.remove(SellectPane);
 		}else */{
 			if(e==11){
@@ -132,7 +154,7 @@ public class MyWindow extends JFrame implements ActionListener{
 		int state;
 		
 		switch(ss){
-		case Biginner:
+		case Beginner:
 			state = 0;
 			break;
 			
@@ -165,23 +187,55 @@ public class MyWindow extends JFrame implements ActionListener{
 			char in = e.getKeyChar();
 			switch(PS){
 			case Sellect:
-				if(in != KeyEvent.VK_1 && in !=KeyEvent.VK_2 && in != KeyEvent.VK_3)
-					break;
-				int Iin = Integer.parseInt("" + in);
-				SellectPane.setVisible(false);
-				CreateLessonPanel(Iin);
-				contentPane.remove(SellectPane);
+				if(in == KeyEvent.VK_ENTER){
+					SSEnter();
+				}else
+				if(in == KeyEvent.VK_LEFT) {
+					goSellectClick(11);
+				}
+				else if(in == KeyEvent.VK_RIGHT) {
+					goSellectClick(10);
+				}
+				else if(in == KeyEvent.VK_1 || in ==KeyEvent.VK_2 || in == KeyEvent.VK_0) {
+					SP123(in);
+				}
 				break;
-			case ShortLesson:
-				if(MiddleLessonPanel.LessonNotEnd){
+			
+			case BeginnerLesson:
+				if(BLP.LessonNotEnd) {
+					break;
+				}
+				if(LessonTimer.isRunning() == false) {
+					LessonTimer.start();
+				}
+				BLP.TypedKey(in);
+				if(BLP.LessonNotEnd) {
+					BLP.deletePointer();
+					if(BLP.getCounter() == 9) {
+						BLP.incCounter();
+						LessonTimer.stop();
+						repaintTimer.start();
+					}
+					else {
+						BLP.incCounter();
+						BLP.newText();
+						BLP.LessonNotEnd = false;
+					}
+					
+				}
+				break;
+
+			case MiddleLesson:
+				if(MLP.LessonNotEnd){
 					break;
 				}
 				if(LessonTimer.isRunning() == false){
 					LessonTimer.start();
 				}
 
-				MiddleLessonPanel.TypedKey(in);
-				if(MiddleLessonPanel.LessonNotEnd){
+				MLP.TypedKey(in);
+				if(MLP.LessonNotEnd){
+					MLP.deletePointer();
 					LessonTimer.stop();
 					repaintTimer.start();
 				}
@@ -191,6 +245,7 @@ public class MyWindow extends JFrame implements ActionListener{
 				if(in == KeyEvent.VK_ENTER)
 					ResultEND();
 					break;
+			default: break;
 			}
 			requestFocus();
 		}
@@ -202,20 +257,41 @@ public class MyWindow extends JFrame implements ActionListener{
 		case Sellect:
 			goSellectClick(Integer.parseInt(e.getActionCommand()));
 			break;
-		case ShortLesson:
+		case BeginnerLesson:
+			if(e.getActionCommand() == "repaintTimer") {
+				if(BLP.LessonNotEnd) {
+					BLP.LessonNotEnd = false;
+					CreateResultPanel(BLP.allNum,
+							BLP.missType,
+							BLP.fixType,
+							BLP.msec);
+					BLP.setEnabled(false);
+					repaintTimer.stop();
+					setVisible(true);
+				}
+				break;
+			}
+			if(e.getActionCommand()=="LessonTimer"){
+				BLP.updateCounter();
+				repaint();
+			}
+			break;
+		case MiddleLesson:
 			if(e.getActionCommand() == "repaintTimer"){
-				if(MiddleLessonPanel.LessonNotEnd){
-					MiddleLessonPanel.LessonNotEnd = false;
-					CreateResultPanel(MiddleLessonPanel.typingNum,
-							MiddleLessonPanel.missTipe,MiddleLessonPanel.fixTipe, MiddleLessonPanel.msec);
-					MiddleLessonPanel.setEnabled(false);
+				if(MLP.LessonNotEnd){
+					MLP.LessonNotEnd = false;
+					CreateResultPanel(MLP.typingNum,
+							MLP.missType,
+							MLP.fixType, 
+							MLP.msec);
+					MLP.setEnabled(false);
 					repaintTimer.stop();
 					setVisible(true);
 				}
 				break ;
 			}
 			if(e.getActionCommand()=="LessonTimer"){
-				MiddleLessonPanel.callLessonTimer();
+				MLP.updateTime();
 				repaint();
 				break;
 			}
@@ -223,6 +299,7 @@ public class MyWindow extends JFrame implements ActionListener{
 		case Result:
 			ResultEND();
 			break;
+		default: break;
 		}
 		requestFocus();
 	}
@@ -250,7 +327,7 @@ public class MyWindow extends JFrame implements ActionListener{
 
 			switch(SS){
 			
-			case Biginner:
+			case Beginner:
 				if(i == 1)
 					setDots(LevelNum, SellectState.Senior);
 				if(i<200){
@@ -262,11 +339,11 @@ public class MyWindow extends JFrame implements ActionListener{
 				
 			case Middle:
 				if(i == 1)
-					setDots(LevelNum, SellectState.Biginner);
+					setDots(LevelNum, SellectState.Beginner);
 				if(i<100){
 					slideLevel(RIGHT);
 				}else {
-					slideEnd(SellectState.Biginner);
+					slideEnd(SellectState.Beginner);
 				}
 				break;
 
@@ -279,14 +356,14 @@ public class MyWindow extends JFrame implements ActionListener{
 					slideEnd(SellectState.Middle);
 				}
 				break;
+			default: break;
 			}
 			
 			i++;
 		}
 	}
 
-	
-	
+
 	public class slideLeftTimerClass implements ActionListener{
 		int i = 0;
 
@@ -300,7 +377,7 @@ public class MyWindow extends JFrame implements ActionListener{
 
 			switch(SS){
 
-			case Biginner:
+			case Beginner:
 				if(i == 1)
 					setDots(LevelNum, SellectState.Middle);
 				if(i<100){
@@ -322,13 +399,14 @@ public class MyWindow extends JFrame implements ActionListener{
 
 			case Senior:
 				if(i == 1)
-					setDots(LevelNum, SellectState.Biginner);
+					setDots(LevelNum, SellectState.Beginner);
 				if(i<200){
 					slideLevel(RIGHT);
 				}else {
-					slideEnd(SellectState.Biginner);
+					slideEnd(SellectState.Beginner);
 				}
 				break;
+			default: break;
 			}
 
 			i++;
@@ -341,11 +419,40 @@ public class MyWindow extends JFrame implements ActionListener{
 
 		@Override
 		public void actionPerformed(ActionEvent arg0) {
-			CreateLessonPanel(1);
+			switch(SS) {
+				case Beginner:
+					CreateLessonPanel(0);
+					break;
+				case Middle:	
+					CreateLessonPanel(1);
+					break;
+				default: break;
+			}
 			contentPane.remove(SellectPane);
 			requestFocus();
 		}
 		
+	}
+	
+	public void SSEnter() {
+		switch(SS) {
+			case Beginner:
+				CreateLessonPanel(0);
+				break;
+			case Middle:	
+				CreateLessonPanel(1);
+				break;
+			default: break;
+		}
+		contentPane.remove(SellectPane);
+		requestFocus();
+	}
+	
+	public void SP123(char in) {
+		int Iin = Integer.parseInt("" + in);
+		SellectPane.setVisible(false);
+		CreateLessonPanel(Iin);
+		contentPane.remove(SellectPane);
 	}
 	
 }

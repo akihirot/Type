@@ -20,14 +20,12 @@ public class SellectPanel extends JPanel{
 //	final Color Niagara = new Color(38,174,144,255);
 	Color[] Col;
 	
-//	final String[] LessonLevel = {"BIGINNER" ,"MIDDLE", "SENIOR"};
+//	final String[] LessonLevel = {"BEGINNER" ,"MIDDLE", "SENIOR"};
 	final String[] LessonLevel = {"èâãâ" ,"íÜãâ", "è„ãâ"};
 	final String[] SellectDistinct = {"<<", ">>"};
 	final String[] htmlTag = {"<html>", "<font color=#60c4b0>", "</font>"};
 	final String    dot = "Åú";
 	final FileInput FI = new FileInput();
-	String[] stColor;
-	String[][] spColor;
 
 	// Field
 //	JButton[] LessonButton;
@@ -43,14 +41,7 @@ public class SellectPanel extends JPanel{
 		super();
 		setLayout(null);
 		
-		getColor();
-		Col = new Color[spColor.length];
-		for(int i = 0; i < spColor.length; i++)
-			Col[i] = new Color(Integer.parseInt(spColor[i][0])
-					, Integer.parseInt(spColor[i][1]),
-				Integer.parseInt(spColor[i][2])
-					, Integer.parseInt(spColor[i][3]));
-		
+		Col = MyColor.getColor();
 		this.setBackground(Col[0]);
 //		LessonButton = new JButton[3];
 		LessonLabel = new JLabel[LessonLevel.length];
@@ -119,13 +110,6 @@ public class SellectPanel extends JPanel{
 		}
 	}
 	
-	public void getColor() {
-		stColor = FI.FileRead("Color.typ");
-		spColor = new String[stColor.length][4];
-		for(int i  = 0; i < stColor.length; i++){
-			spColor[i] = stColor[i].split(",");
-		}
-	}
 	
 	/**** FOR BACK GROUND IMAGE 3/3 *****
 	@Override

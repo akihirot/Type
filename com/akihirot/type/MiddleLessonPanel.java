@@ -4,25 +4,24 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
 
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 
 public class MiddleLessonPanel extends LessonPanel{
 
 	private static final long serialVersionUID = 1L;
 	Random rnd = new Random();
 
-
 	MiddleLessonPanel(){
 		super();
 		setLayout(null);
+		getStLesson("middle.typ");
+	}
 
-		//setLabels
+	//setLabels
+	public void setLabels(){
 		ansLabel = new JLabel();
 		ansLabel.setBounds(100,80,600,100);
 		typeLabel = new JLabel();
@@ -30,18 +29,14 @@ public class MiddleLessonPanel extends LessonPanel{
 		timeLabel = new JLabel();
 		timeLabel.setBounds(600,50,100,50);
 
-		ansLabel.setFont(new Font("Courier New", Font.PLAIN,20));
-		typeLabel.setFont(new Font("Courier New", Font.PLAIN,20));
+		ansLabel.setFont(new Font("Courier New", Font.BOLD,20));
+		typeLabel.setFont(new Font("Courier New", Font.BOLD,20));
 		timeLabel.setFont(new Font("Arial", Font.PLAIN,20));
-
-		getStLesson();
-
 	}
-
 
 	public void setLesson() {
 		ansLabel.setText(stLesson[rnd.nextInt(stLesson.length)]);
-		typeLabel.setText("<html>" + pointer);
+		typeLabel.setText(HTML + pointer);
 		timeLabel.setText("0.00" );
 		add(typeLabel);
 		add(ansLabel);
@@ -51,7 +46,7 @@ public class MiddleLessonPanel extends LessonPanel{
 	public void paintComponent(Graphics g){
 		Graphics2D g2 = (Graphics2D)g;
 
-		g2.setPaint(Aquamarine);
+		g2.setPaint(Col[Aquamarine]);
 		g2.fill(new Rectangle2D.Double(0.0d, 0.0d, 800.0d, 600.0d));
 		g2.setPaint(Color.WHITE);
 		g2.fill(new Rectangle2D.Double(80.0d, 100.0d, 640.0d, 90.0d));
@@ -59,24 +54,79 @@ public class MiddleLessonPanel extends LessonPanel{
 
 	}
 
-
-	public void callLessonTimer(){
-		csec++;
-		msec += 10;
-		if(csec == 100){
-			csec = 0;
-			sec++;
-		}
-		String stCsec;
-		if(csec < 10)
-			stCsec = "0" + csec;
+	public void updateTime(){
+		super.callLessonTimer();
+		
+		String stSec;
+		if(sec < 10)
+			stSec = "0" + sec;
 		else
-			stCsec = "" + csec;
-		timeLabel.setText("" + sec + "." + stCsec);
+			stSec = "" + sec;
+	
+		timeLabel.setText("" + stSec + "." + dsec);
 	}
 
-	public void getStLesson(){
-		stLesson = FI.FileRead("middle.typ");
+	public int TypedKey(char in){
+		String s = typeLabel.getText();
+		s = s.substring(0, s.length()-pointer.length());
+
+		int num = super.checkKey(in, s);
+	
+		switch(num) {
+			case RIGHT:
+				typeLabel.setText(s + in + pointer);
+				typingNum++;
+				break;
+			case INCORRECT:
+				typeLabel.setText(s + FONT_RED + in
+						+ FONT_END + pointer);
+				typingNum++;
+				missType++;
+				break;
+			case BACK_SPACE:
+				backKey(s);
+				break;
+			case SPACE:
+				typeLabel.setText(s + FONT_RED +
+						chSPACE+ FONT_END + pointer);
+				typingNum++;
+				missType++;
+				break;
+			default:
+		}
+
+		repaint();
+
+		if(typingNum >= ansLabel.getText().length())
+		{
+			LessonNotEnd = true;
+			return 0;
+		}
+		return 1;
 	}
 
+	private void backKey(String s){
+		// for check whether </font> is deleted
+		int deleteFont = NO;
+
+		if(s.length() > HTML.length())		// already started
+		{
+			if(s.charAt(s.length()-1) == '>')
+			{		// String's end == </font>
+				s = s.substring(0, s.length()-FONT_END.length());
+				deleteFont = YES;
+			}
+
+			s = s.substring(0,s.length()-1);    // delete end char
+
+			if(deleteFont == YES)
+			{
+				s = s.substring(0, s.length()-FONT_RED.length());
+				missType--;
+			}
+			typeLabel.setText(s + pointer);
+			typingNum --;
+			fixType++;
+		}
+	}
 }

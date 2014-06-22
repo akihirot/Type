@@ -3,9 +3,7 @@ package com.akihirot.type;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -13,24 +11,31 @@ import javax.swing.JPanel;
 
 import com.akihirot.io.FileInput;
 
-public class LessonPanel extends JPanel{
+abstract public class LessonPanel extends JPanel{
 
 	private static final long serialVersionUID = 1L;
 
 	// Fix int
-	final int DISABLE = 0;
-	final int ENABLE = 1;
+	final int NO = 0;
+	final int YES = 1;
+	final int RIGHT = 0;
+	final int INCORRECT = 1;
+	final int BACK_SPACE = 2;
+	final int SPACE = 3;
+	final int Aquamarine = 0;
+	final int UP = 1;
+	final int DOWN = 0;
 
-	// String for Tipe
+	// String for Type
 	String[] stLesson;
 	final String pointer = "<font color=navy>_</font>";
-	final char space = 0x25AF;
-	final String stSpace = "<font color=red>"+space+"</font>" ;
-	final ImageIcon icon = new ImageIcon("key.png");
+	final char chSPACE = 0x25AF;
+	final ImageIcon[] icon = {new ImageIcon("key.png"), new ImageIcon("keyUp.png")};
 	final String[] wordOfKey = {"1234567890-^","QWERTYUIOP@[","ASDFGHJKL;:]","ZXCVBNM,./"};
+	final String FONT_RED = "<font color=red>";
+	final String FONT_END = "</font>";
+	final String HTML = "<html>"; 
 
-	final Color Aquamarine = new Color(0xE0,0xF8,0xD8,255);
-	
 	final FileInput FI = new FileInput();
 
 	JLabel ansLabel;
@@ -41,12 +46,14 @@ public class LessonPanel extends JPanel{
 	JLabel[] KeySt;
 
 	int typingNum;
-	int missTipe;
-	int fixTipe;
+	int missType;
+	int fixType;
 	int sec;
-	int csec;
+	int dsec;
 	int msec;
 	boolean LessonNotEnd;
+
+	Color[] Col;
 
 	LessonPanel(){
 		super();
@@ -57,168 +64,166 @@ public class LessonPanel extends JPanel{
 		 */
 
 		typingNum = 0;
-		missTipe = 0;
-		fixTipe = 0;
+		missType = 0;
+		fixType = 0;
 		sec = 0;
-		csec = 0;
+		dsec = 0;
 		msec = 0;
 		LessonNotEnd = false;
 
-	}
+		Col = (Color[])MyColor.getColor().clone();
 
-
-	public void setLesson(int LessonNum) {
-		ansLabel.setText(stLesson[LessonNum]);
-		typeLabel.setText("<html>" + pointer);
-		timeLabel.setText("0.00" );
-		add(typeLabel);
-		add(ansLabel);
-		add(timeLabel);
+		setLabels();
 
 	}
 
+	public int checkKey(char in, String s) {
 
-		public int TypedKey(char in) {
+		if(in == ansLabel.getText().charAt(typingNum)){		// RIGHT
+			return RIGHT;
+		}		// RIGHT  end
+		else if((0x21<=in && in<=0x3b)||in==0x3d || (0x3f<=in && in<=0x7e))
+		{		// INCORRECT
+			return INCORRECT;
+		}
+		else if(in == KeyEvent.VK_BACK_SPACE)
+		{		// BackSpace key
+			return BACK_SPACE;
+		} // BackSpace key  end
+		else if(in == KeyEvent.VK_SPACE)			// Space key
+		{
+			return SPACE;	
+		}	// Space key  end
+		
+		return -1;	
+	}	// checkKey() end	
 
-			String s = typeLabel.getText();
-			s = s.substring(0, s.length()-pointer.length());
+	public void callLessonTimer(){
+		dsec++;
+		msec += 100;
+		if(dsec == 10){
+			dsec = 0;
+			sec++;
+		}
+	}
 
-			if(in == ansLabel.getText().charAt(typingNum)){			// RIGHT
-				typeLabel.setText(s + in + pointer);
-				typingNum++;
-			}	// RIGHT  end
-			else if((0x21<=in && in<=0x3b)||in==0x3d || (0x3f<=in && in<=0x7e))
-			{		// INCORRECT
-				typeLabel.setText(s +"<font color=red>" + in + "</font>" + pointer);
-				typingNum++;
-				missTipe++;
-			}
-			else if(in == KeyEvent.VK_BACK_SPACE)
-			{																// BackSpace key
-				int deleteFont = DISABLE;
+	// Create KeyBord Image
+	public void showKey() {
+		KeyBord = new JLabel[48];
+		KeySt = new JLabel[48];
 
-				if(s.length() > 6)		// already started
-				{
-					if(s.charAt(s.length()-1) == '>')
-					{		// String's end == </font>
-						s = s.substring(0, s.length()-7);
-						deleteFont = ENABLE;
-					}
+		int counter = 0;
+		int dan = 0;
+		int moji = 0;
 
-					s = s.substring(0,s.length()-1);			// delete end char
+		for(; counter < 12; counter++,moji++){
+			KeySt[counter] = new JLabel();
+			KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
+			KeySt[counter].setBounds(120+(46*moji),300, 45, 45);
+			KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
 
-					if(deleteFont == ENABLE)
-					{
-						s = s.substring(0, s.length()-16);
-						missTipe--;
-					}
-					typeLabel.setText(s + pointer);
-					typingNum --;
-					fixTipe++;
+			KeyBord[counter] = new JLabel(icon[DOWN]);
+			KeyBord[counter].setBounds(110+(46*moji),300, 47, 46);
+
+			add(KeySt[counter]);
+			add(KeyBord[counter]);
+		}
+
+		dan++;
+
+		for(moji = 0; counter < 24; counter++,moji++){
+			KeySt[counter] = new JLabel();
+			KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
+			KeySt[counter].setBounds(120+(23*dan)+(46*moji),300+(46*dan), 45, 45);
+			KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
+
+			KeyBord[counter] = new JLabel(icon[DOWN]);
+			KeyBord[counter].setBounds(110+(23*dan)+(46*moji),300+(46*dan), 47, 46);
+
+			add(KeySt[counter]);
+			add(KeyBord[counter]);
+		}
+
+		dan++;
+
+		for(moji = 0; counter < 36; counter++,moji++){
+			KeySt[counter] = new JLabel();
+			KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
+			KeySt[counter].setBounds(120+(23*dan)+(46*moji),300+(46*dan), 45, 45);
+			KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
+
+			KeyBord[counter] = new JLabel(icon[DOWN]);
+			KeyBord[counter].setBounds(110+(23*dan)+(46*moji),300+(46*dan), 47, 46);
+
+			add(KeySt[counter]);
+			add(KeyBord[counter]);
+		}
+
+		dan++;
+
+		for(moji = 0; counter < 46; counter++,moji++){
+			KeySt[counter] = new JLabel();
+			KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
+			KeySt[counter].setBounds(120+(23*dan)+(46*moji),300+(46*dan), 45, 45);
+			KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
+
+			KeyBord[counter] = new JLabel(icon[DOWN]);
+			KeyBord[counter].setBounds(110+(23*dan)+(46*moji),300+(46*dan), 47, 46);
+
+			add(KeySt[counter]);
+			add(KeyBord[counter]);
+		}
+
+	}
+
+	public void updownKey(int UD) {
+		char Key = ansLabel.getText().charAt(typingNum);
+		int dan = 0;
+		int moji = 0;
+		int hit = -1;
+		for(dan = 0; dan < wordOfKey.length; dan++) {
+			for(moji = 0; moji < wordOfKey[dan].length(); moji++) {
+				if(Key == wordOfKey[dan].charAt(moji)){
+					hit = 1;
+					break;
 				}
-			} // BackSpace key  end
-			else if(in == KeyEvent.VK_SPACE)			// Space key
-			{
-				typeLabel.setText(s +"<font color=red>"+space+"</font>" + pointer);
-				typingNum++;
-				missTipe++;
-			}	// Space key  end
-
-			repaint();
-
-			if(typingNum >= ansLabel.getText().length())
-			{
-/*				typingNum=0;
-				missTipe=0;
-				fixTipe=0;*/
-				LessonNotEnd = true;
-				return 0;
 			}
-			return 1;
-		}	// keyTyped() end
-
-		public void callLessonTimer(){
-			csec++;
-			msec += 10;
-			if(csec == 100){
-				csec = 0;
-				sec++;
-			}
-			String stCsec;
-			if(csec < 10)
-				stCsec = "0" + csec;
-			else
-				stCsec = "" + csec;
-			timeLabel.setText("" + sec + "." + stCsec);
+			if(hit == 1)
+				break;
 		}
-
-		// Create KeyBord Image
-		public void showKey() {
-			KeyBord = new JLabel[48];
-			KeySt = new JLabel[48];
-
+		if(hit == 1){
 			int counter = 0;
-			int dan = 0;
-			int moji = 0;
-
-			for(; counter < 12; counter++,moji++){
-				KeySt[counter] = new JLabel();
-				KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
-				KeySt[counter].setBounds(120+(46*moji),300, 45, 45);
-				KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
-
-				KeyBord[counter] = new JLabel(icon);
-				KeyBord[counter].setBounds(110+(46*moji),300, 47, 46);
-
-				add(KeySt[counter]);
-				add(KeyBord[counter]);
-			}
-
-			dan++;
-
-			for(moji = 0; counter < 24; counter++,moji++){
-				KeySt[counter] = new JLabel();
-				KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
-				KeySt[counter].setBounds(120+(23*dan)+(46*moji),300+(46*dan), 45, 45);
-				KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
-
-				KeyBord[counter] = new JLabel(icon);
-				KeyBord[counter].setBounds(110+(23*dan)+(46*moji),300+(46*dan), 47, 46);
-
-				add(KeySt[counter]);
-				add(KeyBord[counter]);
-			}
-
-			dan++;
-
-			for(moji = 0; counter < 36; counter++,moji++){
-				KeySt[counter] = new JLabel();
-				KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
-				KeySt[counter].setBounds(120+(23*dan)+(46*moji),300+(46*dan), 45, 45);
-				KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
-
-				KeyBord[counter] = new JLabel(icon);
-				KeyBord[counter].setBounds(110+(23*dan)+(46*moji),300+(46*dan), 47, 46);
-
-				add(KeySt[counter]);
-				add(KeyBord[counter]);
-			}
-
-			dan++;
-
-			for(moji = 0; counter < 46; counter++,moji++){
-				KeySt[counter] = new JLabel();
-				KeySt[counter].setText(""+wordOfKey[dan].charAt(moji));
-				KeySt[counter].setBounds(120+(23*dan)+(46*moji),300+(46*dan), 45, 45);
-				KeySt[counter].setFont(new Font("Arial", Font.BOLD,20));
-
-				KeyBord[counter] = new JLabel(icon);
-				KeyBord[counter].setBounds(110+(23*dan)+(46*moji),300+(46*dan), 47, 46);
-
-				add(KeySt[counter]);
-				add(KeyBord[counter]);
-			}
-
+			for(int i = 0; i < dan; i++)
+				counter += wordOfKey[i].length();
+			counter += moji;
+			KeyBord[counter].setIcon(icon[UD]);
 		}
+	}
 
+	public void deletePointer() {
+		String s = typeLabel.getText();
+		s = s.substring(0, s.length()-pointer.length());
+		typeLabel.setText(s);
+	}
+
+	// get sentence for Lesson
+	public void getStLesson(String st){
+		stLesson = FI.FileRead(st);
+	}
+	
+	// set Time for timeLabel
+	abstract public void updateTime();
+
+	// Paint Text area
+	abstract public void paintComponent(Graphics g);
+
+	// Initialize Labels
+	abstract public void setLabels();
+
+	// set Lesson's Text
+	abstract public void setLesson();
+
+	// Key Event
+	abstract public int TypedKey(char in);
 }
+
