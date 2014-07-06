@@ -43,7 +43,7 @@ public class MyWindow extends JFrame implements ActionListener{
 	SellectState SS = SellectState.Beginner;
 
 	MyWindow() {
-		super("Typinnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+		super("ATType");
 
 		setSize(800,600);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
